@@ -1,65 +1,57 @@
 <?php
 
-/*
-
-//первая "пятница 13" в 21 веке: 13.04.2001, от неё и пляшем
-
-//число дней в текущем месяце
-const pp: array [1..12] of byte = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
-
-var m, y, n, k: integer;
-
-begin
-  n := 0; //счётчик дней
-  k := 0; //пока нет пятниц 13
-  m := 4; //начинаем от 04 месяца 2001 года
-  for y := 2001 to 3000 do //цикл по годам
-    begin
-      while m <= 12 do //цикл по месяцам
-        begin
-          n := n mod 7;
-          if n = 0 then k := k + 1; //если счётчик дней делится нацело на 7, то это одна из пятниц 13
-          n := n + pp[m]; //прибавляем к счётчику число дней в текущем месяце
-          if (m = 2) and (y mod 4 = 0) then n := n + 1; //если текущий месяц февраль и год високосный, добавляем ещё один день
-          m := m + 1 //следующий месяц
-        end;
-      m := 1 //январь следующего года
-    end;
-  writeln('Count of "Friday 13" in 2001..3000: ', k);
-  readln
-end.
- * */
 class FridayCounter
 {
-    static protected $daysOfMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    protected $countFr13 = 0;
+    protected $countFriday13 = 0;
 
     protected $beginYear, $endYear;
 
+    /**
+     * FridayCounter constructor.
+     * @param $beginYear
+     * @param $endYear
+     * @throws Exception
+     */
     public function __construct($beginYear, $endYear) {
+        if($beginYear <= 0 || $endYear <= 0)
+            throw new Exception('The year could not be negative or null');
+        if($beginYear > $endYear)
+            throw new Exception('Begin year could not be bigger than end year');
+
         $this->beginYear = $beginYear;
         $this->endYear = $endYear;
     }
 
-    private function funk() {
-        $day = 0;
+    /**
+     * toString handler
+     * @return string
+     */
+    public function __toString() {
+        return strval($this->countFriday13);
+    }
 
+    /**
+     *  Searches and counts all fridays 13 in leap years
+     */
+    private function searchFriday13() {
         for($year = $this->beginYear; $year <= $this->endYear; $year++) {
             for($month = 1; $month <= 12; $month++) {
-                $this->countFr13 += !($day % 7) ? 1 : 0;
+                $date = mktime(0, 0, 0, $month, 13, $year);
 
-                $day += ( $month == 2 && !($year % 4) )
-                    ? self::$daysOfMonth[$month] + 1
-                    : self::$daysOfMonth[$month];
+                $this->countFriday13 += ( 5 == date('w', $date) &&
+                    ( !($year % 4)  || !($year % 400) )) ? 1 : 0;
             }
         }
     }
 
+    /**
+     * Return the count of all fridays 13 in leap year
+     * @return int
+     */
     public function getCountOfFriday() {
-        $this->funk();
-        return $this->countFr13;
+        $this->searchFriday13();
+        return $this->countFriday13;
     }
-
 }
 
 ?>
